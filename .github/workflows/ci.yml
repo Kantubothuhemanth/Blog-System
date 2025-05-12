@@ -1,0 +1,46 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start SonarQube
+        run: |
+          docker run -d --name sonarqube -p 9000:9000 sonarqube:lts
+          
+      - name: Wait for SonarQube to be available
+        run: |
+          echo "Waiting for SonarQube to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9000 | grep -q "SonarQube"; then
+              echo "SonarQube is up!"
+              break
+            fi
+            echo "Waiting..."
+            sleep 10
+          done
+          
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run SonarQube Scanner
+        run: |
+          export SONAR_HOST="http://localhost:9000"
+          export SONAR_PROJECT_KEY="your_project"
+          export SONAR_TOKEN="18d181f56070e48bf546a27b5470f49cbd34842d"
+
+          npx sonarqube-scanner \
+            -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=$SONAR_HOST \
+            -Dsonar.login=$SONAR_TOKEN
