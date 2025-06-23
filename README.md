@@ -11,7 +11,7 @@
 - Delete Comments
 
 # File structure: 
- |--gyanavardhana/
+ |--Hemanth/
  
       |--Blog-System/
           |--static/
